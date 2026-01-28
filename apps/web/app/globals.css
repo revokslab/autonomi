@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Hedvig Serif';
+  src: url('/fonts/Hedvig-Sans.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hedvig Sans';
+  src: url('/fonts/Hedvig-Serif.woff2') format('woff2');
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
