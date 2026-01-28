@@ -2,24 +2,24 @@ import { FaXTwitter } from "react-icons/fa6";
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[#0C0C0C] flex items-center justify-center px-4">
-      <div className="w-full max-w-md flex flex-col items-center">
+    <main className="min-h-dvh sm:min-h-screen bg-[#0C0C0C] flex items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 overflow-x-hidden">
+      <div className="w-full max-w-md min-w-0 flex flex-col items-center">
         {/* Title */}
         <h1
-          className="text-[#FAFAFA] text-lg mb-3 text-center"
+          className="text-[#FAFAFA] text-lg sm:text-xl md:text-2xl mb-3 text-center"
           style={{ fontFamily: "'Hedvig Serif', serif" }}
         >
           Welcome to Autonomi
         </h1>
 
         {/* Subtitle */}
-        <p className="font-sans text-sm text-[#878787] mb-8 text-center">
+        <p className="font-sans text-sm text-[#878787] mb-6 sm:mb-8 text-center">
           Sign in or create an account
         </p>
 
         {/* Form Container */}
         <div
-          className="w-full flex flex-col gap-3"
+          className="w-full min-w-0 flex flex-col gap-3"
           style={{ fontFamily: "'Hedvig Sans', sans-serif" }}
         >
           {/* Email sign-in (top) */}
@@ -27,35 +27,35 @@ export default function LoginPage() {
             id="email"
             type="email"
             placeholder="Enter email address"
-            className="flex h-9 w-full border border-[#1C1C1C] bg-transparent px-3 py-1 text-sm text-[#FAFAFA] transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[#878787] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&:-webkit-autofill]:!bg-transparent [&:-webkit-autofill]:!bg-none [&:-webkit-autofill]:!shadow-none rounded-none"
+            className="flex min-h-[44px] sm:h-9 w-full border border-[#1C1C1C] bg-transparent px-3 py-2 sm:py-1 text-base sm:text-sm text-[#FAFAFA] transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[#878787] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&:-webkit-autofill]:!bg-transparent [&:-webkit-autofill]:!bg-none [&:-webkit-autofill]:!shadow-none rounded-none"
           />
           <button
             type="button"
-            className="flex items-center justify-center text-sm transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 hover:bg-white/90 relative bg-white px-6 py-4 text-[#0e0e0e] font-medium h-[40px] w-full rounded-none cursor-pointer"
+            className="flex items-center justify-center text-sm transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 hover:bg-white/90 relative bg-white px-6 py-3 sm:py-4 text-[#0e0e0e] font-medium min-h-[44px] sm:h-[40px] w-full rounded-none cursor-pointer"
           >
             Continue
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-2">
-            <div className="flex-1 h-px bg-[#1C1C1C]" />
-            <span className="text-[#878787] text-sm">or</span>
-            <div className="flex-1 h-px bg-[#1C1C1C]" />
+            <div className="flex-1 min-w-0 h-px bg-[#1C1C1C]" />
+            <span className="text-[#878787] text-sm shrink-0">or</span>
+            <div className="flex-1 min-w-0 h-px bg-[#1C1C1C]" />
           </div>
 
           {/* OAuth (bottom) */}
-          <button className="inline-flex items-center justify-center gap-3 font-medium focus-visible:outline-none disabled:pointer-events-none relative w-full bg-transparent border border-[#1C1C1C] text-[#FAFAFA] font-sans text-sm h-[40px] px-6 py-4 hover:bg-[#1C1C1C]/10 transition-colors disabled:opacity-50 cursor-pointer">
+          <button className="inline-flex items-center justify-center gap-3 font-medium focus-visible:outline-none disabled:pointer-events-none relative w-full bg-transparent border border-[#1C1C1C] text-[#FAFAFA] font-sans text-sm min-h-[44px] sm:h-[40px] px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#1C1C1C]/10 transition-colors disabled:opacity-50 cursor-pointer">
             <GoogleIcon />
             <span>Continue with Google</span>
           </button>
-          <button className="inline-flex items-center justify-center gap-3 font-medium focus-visible:outline-none disabled:pointer-events-none relative w-full bg-transparent border border-[#1C1C1C] text-[#FAFAFA] font-sans text-sm h-[40px] px-6 py-4 hover:bg-[#1C1C1C]/10 transition-colors disabled:opacity-50 cursor-pointer">
-            <FaXTwitter className="w-4 h-4" />
+          <button className="inline-flex items-center justify-center gap-3 font-medium focus-visible:outline-none disabled:pointer-events-none relative w-full bg-transparent border border-[#1C1C1C] text-[#FAFAFA] font-sans text-sm min-h-[44px] sm:h-[40px] px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#1C1C1C]/10 transition-colors disabled:opacity-50 cursor-pointer">
+            <FaXTwitter className="w-4 h-4 shrink-0" />
             <span>Continue with Twitter</span>
           </button>
         </div>
 
         {/* Footer */}
-        <p className="font-sans text-xs text-[#878787] mt-16 text-center">
+        <p className="font-sans text-xs text-[#878787] mt-8 sm:mt-12 md:mt-16 text-center w-full px-1 sm:px-0">
           By signing in you agree to our{" "}
           <a href="#" className="text-[#878787] hover:text-[#FAFAFA] transition-colors underline">
             Terms of service
