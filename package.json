@@ -1,21 +1,31 @@
 {
-    "name": "autonomi",
-    "private": true,
-    "workspaces": ["packages/*", "apps/*"],
-    "scripts": {
-        "build": "turbo build",
-        "clean": "git clean -xdf node_modules",
-        "clean:workspaces": "turbo clean",
-        "dev": "turbo dev --parallel",
-        "dev:api": "turbo dev --filter=@autonomi/api",
-        "format": "biome format --write .",
-        "lint": "turbo lint && manypkg check",
-        "typecheck": "turbo typecheck"
-    },
-    "dependencies": {},
-    "packageManager": "bun@1.2.22",
-    "devDependencies": {
-        "@biomejs/biome": "^2.3.13",
-        "turbo": "^2.7.6"
-    }
+	"name": "autonomi",
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.13",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"turbo": "^2.7.6"
+	},
+	"packageManager": "bun@1.2.22",
+	"private": true,
+	"scripts": {
+		"build": "turbo build",
+		"clean": "git clean -xdf node_modules",
+		"clean:workspaces": "turbo clean",
+		"dev": "turbo dev --parallel",
+		"dev:api": "turbo dev --filter=@autonomi/api",
+		"format": "biome format --write .",
+		"lint": "turbo lint && manypkg check",
+		"typecheck": "turbo typecheck",
+		"prepare": "husky"
+	},
+	"workspaces": [
+		"packages/*",
+		"apps/*"
+	],
+	"lint-staged": {
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+			"biome format --write --no-errors-on-unmatched"
+		]
+	}
 }
