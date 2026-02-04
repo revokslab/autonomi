@@ -68,7 +68,7 @@ export default function DashboardPage() {
 						Here is a quick snap of your finances
 					</p>
 				</div>
-				<div className="flex items-start gap-2.5">
+				<div className="flex items-center gap-2.5">
 					<button
 						type="button"
 						className="flex h-11 w-11 shrink-0 items-center justify-center border border-[#1E1E1E] bg-[#0B0B0B] text-white transition-colors hover:bg-[#141414]"
@@ -90,7 +90,7 @@ export default function DashboardPage() {
 					<div className="flex items-stretch border border-[#1E1E1E] [&>button]:border-r [&>button]:border-[#1E1E1E] [&>button:last-child]:border-r-0">
 						<button
 							type="button"
-							className="min-h-11 border-r border-[#1E1E1E] bg-[#0A0A0A] px-6 py-3.5 text-sm leading-5 text-white transition-colors"
+							className="h-11 border-r border-[#1E1E1E] bg-[#0A0A0A] px-6 py-3.5 text-sm leading-5 text-white transition-colors"
 							style={{
 								fontFamily:
 									"var(--font-hedvig-sans), 'Hedvig Letters Sans', sans-serif",
@@ -100,7 +100,7 @@ export default function DashboardPage() {
 						</button>
 						<button
 							type="button"
-							className="min-h-11 bg-[#0B0B0B] px-6 py-3.5 text-sm leading-5 text-[#8A8A8A] transition-colors hover:text-[#B2B2B2]"
+							className="h-11 bg-[#0B0B0B] px-6 py-3.5 text-sm leading-5 text-[#8A8A8A] transition-colors hover:text-[#B2B2B2]"
 							style={{
 								fontFamily:
 									"var(--font-hedvig-sans), 'Hedvig Letters Sans', sans-serif",
