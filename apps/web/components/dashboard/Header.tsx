@@ -16,7 +16,7 @@ export function Header() {
 					className="min-w-0 flex-1 border-0 bg-transparent text-[15.68px] leading-[21px] text-[#FAFAFA] placeholder:text-[#494949] focus:outline-none focus:ring-0"
 					style={{
 						fontFamily:
-							"var(--font-hedvig-serif), 'Hedvig Letters Serif', serif",
+							"var(--font-hedvig-sans), 'Hedvig Letters Sans', sans-serif",
 					}}
 					aria-label="Search"
 				/>
@@ -33,7 +33,7 @@ export function Header() {
 					className="h-9 w-9 shrink-0 rounded-full bg-[#282828] flex items-center justify-center text-[#B2B2B2] text-sm font-medium"
 					style={{
 						fontFamily:
-							"var(--font-hedvig-serif), 'Hedvig Letters Serif', serif",
+							"var(--font-hedvig-sans), 'Hedvig Letters Sans', sans-serif",
 					}}
 					role="img"
 					aria-label="User avatar"

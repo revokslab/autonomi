@@ -10,6 +10,7 @@ import {
 	ResponsiveContainer,
 	Tooltip,
 } from "recharts";
+import { useState, useRef, useEffect } from "react";
 
 const portfolioData = [
 	{ date: "21 Jul", value: 200 },
@@ -23,7 +24,36 @@ const portfolioData = [
 
 const timeRanges = ["24H", "1W", "1M", "1Y"] as const;
 
+const assets = [
+	{ symbol: "BTC", name: "Bitcoin", color: "#F7931A" },
+	{ symbol: "ETH", name: "Ethereum", color: "#627EEA" },
+	{ symbol: "SOL", name: "Solana", color: "#9945FF" },
+	{ symbol: "USDC", name: "USD Coin", color: "#2775CA" },
+];
+
 export function PortfolioPanel() {
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [selectedAsset, setSelectedAsset] = useState(assets[0]);
+	const dropdownRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (
+				dropdownRef.current &&
+				!dropdownRef.current.contains(event.target as Node)
+			) {
+				setIsDropdownOpen(false);
+			}
+		}
+
+		if (isDropdownOpen) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isDropdownOpen]);
 	return (
 		<div className="flex flex-1 flex-col gap-6 border border-[#1E1E1E] p-6">
 			<div className="flex items-start justify-between gap-4">
@@ -33,7 +63,10 @@ export function PortfolioPanel() {
 					</div>
 					<span
 						className="text-base leading-7 text-[#FAFAFA]"
-						style={{ fontFamily: "var(--font-geist-sans)" }}
+						style={{
+							fontFamily:
+								"var(--font-hedvig-serif), 'Hedvig Letters Serif', serif",
+						}}
 					>
 						Total Portfolio
 					</span>
@@ -59,26 +92,64 @@ export function PortfolioPanel() {
 				</div>
 			</div>
 			<div className="flex flex-wrap items-center gap-6">
-				<button
-					type="button"
-					className="flex h-10 items-center gap-2.5 border border-[#1E1E1E] bg-[#141414] px-3 py-2"
-					aria-label="Select asset"
-				>
-					<div
-						className="h-[19px] w-[19px] shrink-0 rounded-full bg-[#F7931A]"
-						aria-hidden
-					/>
-					<span
-						className="font-mono text-xs leading-4 text-white"
-						style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+				<div className="relative" ref={dropdownRef}>
+					<button
+						type="button"
+						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+						className="flex h-10 items-center gap-2.5 border border-[#1E1E1E] bg-[#141414] px-3 py-2 transition-colors hover:bg-[#1a1a1a]"
+						aria-label="Select asset"
+						aria-expanded={isDropdownOpen}
 					>
-						Bitcoin (BTC)
-					</span>
-					<ChevronDown
-						className="h-4 w-4 shrink-0 text-white"
-						strokeWidth={1}
-					/>
-				</button>
+						<div
+							className="h-[19px] w-[19px] shrink-0 rounded-full"
+							style={{ backgroundColor: selectedAsset.color }}
+							aria-hidden
+						/>
+						<span
+							className="font-mono text-xs leading-4 text-white"
+							style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+						>
+							{selectedAsset.name} ({selectedAsset.symbol})
+						</span>
+						<ChevronDown
+							className={`h-4 w-4 shrink-0 text-white transition-transform ${
+								isDropdownOpen ? "rotate-180" : ""
+							}`}
+							strokeWidth={1}
+						/>
+					</button>
+					{isDropdownOpen && (
+						<div className="absolute left-0 top-full z-50 mt-1 min-w-[175px] border border-[#1E1E1E] bg-[#0B0B0B] shadow-lg">
+							{assets.map((asset) => (
+								<button
+									key={asset.symbol}
+									type="button"
+									onClick={() => {
+										setSelectedAsset(asset);
+										setIsDropdownOpen(false);
+									}}
+									className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors ${
+										selectedAsset.symbol === asset.symbol
+											? "bg-[#141414]"
+											: "hover:bg-[#141414]"
+									}`}
+								>
+									<div
+										className="h-[19px] w-[19px] shrink-0 rounded-full"
+										style={{ backgroundColor: asset.color }}
+										aria-hidden
+									/>
+									<span
+										className="font-mono text-xs leading-4 text-white"
+										style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+									>
+										{asset.name} ({asset.symbol})
+									</span>
+								</button>
+							))}
+						</div>
+					)}
+				</div>
 				<div className="flex items-center gap-3">
 					<span
 						className="text-[23.64px] leading-[43px] tracking-[-0.02em] text-[#FAFAFA]"

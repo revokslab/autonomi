@@ -13,13 +13,18 @@ const actions = [
 	"Deep Scan",
 ];
 
-export function QuickActionsBar() {
+type QuickActionsBarProps = {
+	onActionClick: (value: string) => void;
+};
+
+export function QuickActionsBar({ onActionClick }: QuickActionsBarProps) {
 	return (
 		<div className="flex flex-wrap items-start gap-6 px-6">
 			{actions.map((label) => (
 				<button
 					key={label}
 					type="button"
+					onClick={() => onActionClick(label)}
 					className="flex items-center justify-center gap-2 bg-[#131313] px-3 py-3.5 text-xs leading-4 text-white transition-colors hover:bg-[#1a1a1a]"
 					style={{
 						fontFamily:

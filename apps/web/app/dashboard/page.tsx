@@ -1,6 +1,7 @@
 "use client";
 
 import { LayoutGrid, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { QuickPicksPanel } from "@/components/dashboard/QuickPicksPanel";
@@ -40,6 +41,8 @@ const metrics = [
 ];
 
 export default function DashboardPage() {
+	const [aiInputValue, setAiInputValue] = useState("");
+
 	return (
 		<>
 			<Header />
@@ -126,8 +129,8 @@ export default function DashboardPage() {
 				<QuickPicksPanel />
 				<PortfolioPanel />
 			</section>
-			<QuickActionsBar />
-			<AIInputBox />
+			<QuickActionsBar onActionClick={setAiInputValue} />
+			<AIInputBox value={aiInputValue} onChange={setAiInputValue} />
 		</>
 	);
 }
