@@ -1,1 +1,4 @@
-bunx lint-staged
+# Git runs with a minimal PATH; ensure node/bun are available
+export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.bun/bin:$PATH"
+[ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh"
+./node_modules/.bin/lint-staged
