@@ -1,68 +1,65 @@
 # syntax=docker/dockerfile:1
-FROM oven/bun:1.3.5-alpine AS base
+FROM oven/bun:1 AS base
 
-# Builder stage - prunes monorepo and installs dependencies
-FROM base AS builder
-RUN apk update && apk add --no-cache libc6-compat python3 make g++
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS pruner
 WORKDIR /app
 
-# Install turbo globally with specific version for better caching
-RUN bun install -g turbo@^2
+RUN bun install -g turbo@2.7.6
 
-# Copy entire monorepo for pruning
 COPY . .
 
-# Generate a partial monorepo with pruned lockfile for web workspace
+# Create sparse monorepo with only dependencies needed for @autonomi/web
 RUN turbo prune @autonomi/web --docker
 
-# Installer stage - installs dependencies from pruned workspace
 FROM base AS installer
-RUN apk update && apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# Install turbo in this stage too since we need it for building
-RUN bun install -g turbo@^2
+RUN bun install -g turbo@2.7.6
 
-# Copy lockfile and package.json files from pruned workspace
-COPY --from=builder /app/out/json/ .
+# Copy pruned package.json files and lockfile (out/json contains dependency manifests)
+COPY --from=pruner /app/out/json/ .
 
-# Install dependencies (includes dev dependencies needed for build)
-RUN bun install
+RUN bun install --frozen-lockfile
 
-# Copy source files
-COPY --from=builder /app/out/full/ .
+FROM installer AS builder
+WORKDIR /app
 
-# Build the application
+# Copy pruned source code (out/full contains workspace files)
+COPY --from=pruner /app/out/full/ .
+
 RUN turbo build --filter=@autonomi/web...
 
-# Production stage
 FROM base AS runner
-RUN apk update && apk add --no-cache wget
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-USER bun
+# Next.js standalone output includes server.js and traced dependencies
+COPY --from=builder --chown=bun:bun /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=bun:bun /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=bun:bun /app/apps/web/public ./apps/web/public
 
-# Copy standalone output (includes traced node_modules and server.js)
-COPY --from=installer --chown=bun:bun /app/apps/web/.next/standalone ./
-# Copy static assets
-COPY --from=installer --chown=bun:bun /app/apps/web/.next/static ./apps/web/.next/static
-# Copy public assets
-COPY --from=installer --chown=bun:bun /app/apps/web/public ./apps/web/public
-
-# Run from the apps/web directory (standalone server.js expects this path)
 WORKDIR /app/apps/web
+
+USER bun
 
 EXPOSE 3000
 
-# Health check for Swarm rolling updates
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Graceful shutdown signal for rolling updates
 STOPSIGNAL SIGTERM
 
 CMD ["bun", "run", "server.js"]
