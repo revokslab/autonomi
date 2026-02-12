@@ -15,6 +15,13 @@
 			"service": "autonomi"
 		}
 	],
+	"r2_buckets": [
+		{
+			"bucket_name": "autonomi-inc-cache",
+			"binding": "autonomi_inc_cache",
+			"remote": true
+		}
+	],
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
