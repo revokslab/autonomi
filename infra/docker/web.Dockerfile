@@ -22,7 +22,7 @@ COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
 
 # Install dependencies
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
