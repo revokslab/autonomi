@@ -1,24 +1,27 @@
 "use client";
 
 import {
-	usePrivy,
 	useLoginWithEmail,
 	useLoginWithOAuth,
+	usePrivy,
 } from "@privy-io/react-auth";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { FaXTwitter } from "react-icons/fa6";
 
 function GoogleIcon() {
 	return (
 		<svg
+			aria-hidden
 			width="18"
 			height="18"
 			viewBox="0 0 18 18"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 		>
+			<title>Google</title>
 			<path
 				d="M17.64 9.20455C17.64 8.56636 17.5827 7.95273 17.4764 7.36364H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8195H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20455Z"
 				fill="#4285F4"
@@ -202,6 +205,7 @@ export default function LoginPage() {
 								stroke="currentColor"
 								viewBox="0 0 24 24"
 							>
+								<title>Wallet</title>
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -215,19 +219,19 @@ export default function LoginPage() {
 
 					<p className="font-sans text-xs text-neutral-400 mt-8 text-center w-full">
 						By signing in you agree to our{" "}
-						<a
+						<Link
 							href="#"
 							className="text-neutral-500 hover:text-neutral-700 underline"
 						>
 							Terms of service
-						</a>{" "}
+						</Link>{" "}
 						&{" "}
-						<a
+						<Link
 							href="#"
 							className="text-neutral-500 hover:text-neutral-700 underline"
 						>
 							Privacy policy
-						</a>
+						</Link>
 					</p>
 				</div>
 			</div>
@@ -235,7 +239,7 @@ export default function LoginPage() {
 			{/* Right: image - hidden on phones/small screens, show from lg */}
 			<div className="hidden lg:block flex-1 min-h-0 relative bg-neutral-100">
 				<Image
-					src="/login.png"
+					src="/login.jpeg"
 					alt=""
 					fill
 					className="object-cover object-center"
