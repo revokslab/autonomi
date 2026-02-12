@@ -1,13 +1,43 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { ButtonWithCorners } from "./_components/button-with-corners";
 import { Keycap } from "./_components/keycap";
 import { Discord, Telegram, XformerlyTwitter } from "@/components/svg";
 
+const hotkeysOptions = {
+	preventDefault: true,
+	enableOnFormTags: false,
+};
+
 export default function Home() {
 	const year = useMemo(() => new Date().getFullYear(), []);
+	const router = useRouter();
+
+	// D - Demo: scroll to #demo
+	useHotkeys(
+		"d, D",
+		() =>
+			document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" }),
+		hotkeysOptions,
+	);
+
+	// L - Login: navigate to /login
+	useHotkeys("l, L", () => router.push("/login"), hotkeysOptions);
+
+	// G - Get Started: scroll to #book
+	useHotkeys(
+		"g, G",
+		() =>
+			document.getElementById("book")?.scrollIntoView({ behavior: "smooth" }),
+		hotkeysOptions,
+	);
+
 	return (
 		<div className="flex h-screen min-h-0 flex-col overflow-hidden text-neutral-900">
 			<header className="shrink-0 px-6 py-3">
@@ -44,7 +74,10 @@ export default function Home() {
 				</div>
 			</header>
 
-			<main className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-6 text-center">
+			<main
+				id="demo"
+				className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-6 text-center"
+			>
 				<div className="mb-3 flex w-full justify-center">
 					<ButtonWithCorners>
 						<p
@@ -92,15 +125,17 @@ export default function Home() {
 					and manage assets while you focus on what matters — just command.
 				</p>
 
-				<ButtonWithCorners>
-					<Link
-						href="#book"
-						className="inline-flex items-center gap-2 rounded-none border border-neutral-300 bg-transparent px-8 py-3 text-sm font-normal text-neutral-900 transition hover:bg-neutral-100/80"
-						style={{ fontFamily: "var(--font-dm-mono), monospace" }}
-					>
-						Get Started <Keycap letter="G" />
-					</Link>
-				</ButtonWithCorners>
+				<div id="book">
+					<ButtonWithCorners>
+						<Link
+							href="#book"
+							className="inline-flex items-center gap-2 rounded-none border border-neutral-300 bg-transparent px-8 py-3 text-sm font-normal text-neutral-900 transition hover:bg-neutral-100/80"
+							style={{ fontFamily: "var(--font-dm-mono), monospace" }}
+						>
+							Get Started <Keycap letter="G" />
+						</Link>
+					</ButtonWithCorners>
+				</div>
 			</main>
 			<footer className="shrink-0 px-6 py-3">
 				<div className="mx-auto flex w-full max-w-full items-center justify-between">
