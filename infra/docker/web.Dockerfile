@@ -19,6 +19,7 @@ WORKDIR /app
 
 # Copy package.json files from pruned workspace
 COPY --from=builder /app/out/json/ .
+COPY bunfig.toml .
 
 # Install dependencies
 RUN bun install
