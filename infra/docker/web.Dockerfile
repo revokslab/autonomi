@@ -1,13 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM oven/bun:1 AS base
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    make \
-    g++ \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
 FROM base AS pruner
 WORKDIR /app
 
@@ -37,9 +30,7 @@ COPY --from=pruner /app/out/full/ .
 RUN turbo build --filter=@autonomi/web...
 
 FROM base AS runner
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 ENV NODE_ENV=production
