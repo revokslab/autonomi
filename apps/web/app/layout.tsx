@@ -8,6 +8,7 @@ import {
 	Inter,
 } from "next/font/google";
 import localFont from "next/font/local";
+
 import { PrivyProviderWrapper } from "@/components/providers/PrivyProviderWrapper";
 import "./globals.css";
 

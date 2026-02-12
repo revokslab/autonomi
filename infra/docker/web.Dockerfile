@@ -26,6 +26,9 @@ RUN bun install
 # Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
 
+# Build-time NEXT_PUBLIC_ env vars
+ARG NEXT_PUBLIC_PRIVY_APP_ID
+
 # Build engine types (dependency) then dashboard only
 ENV NODE_ENV=production
 RUN bunx turbo run build --filter=@autonomi/web --only
