@@ -71,10 +71,6 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${kaliceFont.variable} ${dmMono.variable} ${hedvigLettersSans.variable} ${hedvigLettersSerif.variable} antialiased`}
 			>
 				<Providers>{children}</Providers>
-				<div
-					className="fixed inset-0 z-50 h-screen w-full bg-[url('/grain.jpg')] bg-repeat bg-auto opacity-[0.04] pointer-events-none select-none"
-					aria-hidden
-				/>
 			</body>
 		</html>
 	);
