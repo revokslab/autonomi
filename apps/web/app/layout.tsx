@@ -8,7 +8,8 @@ import {
 	Inter,
 } from "next/font/google";
 import localFont from "next/font/local";
-import { PrivyProviderWrapper } from "@/components/providers/PrivyProviderWrapper";
+
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -69,7 +70,7 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${kaliceFont.variable} ${dmMono.variable} ${hedvigLettersSans.variable} ${hedvigLettersSerif.variable} antialiased`}
 			>
-				<PrivyProviderWrapper>{children}</PrivyProviderWrapper>
+				<Providers>{children}</Providers>
 				<div
 					className="fixed inset-0 z-50 h-screen w-full bg-[url('/grain.jpg')] bg-repeat bg-auto opacity-[0.04] pointer-events-none select-none"
 					aria-hidden

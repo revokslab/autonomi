@@ -1,68 +1,68 @@
-# syntax=docker/dockerfile:1
-FROM oven/bun:1.3.5-alpine AS base
+# Base image with Bun
+FROM oven/bun:1.3.9 AS base
 
-# Builder stage - prunes monorepo and installs dependencies
-FROM base AS builder
-RUN apk update && apk add --no-cache libc6-compat python3 make g++
+# Install turbo CLI globally using Bun
+FROM base AS turbo-cli
+RUN bun add -g turbo
+
+# Builder stage - prune dashboard workspace
+FROM turbo-cli AS builder
 WORKDIR /app
-
-# Install turbo globally with specific version for better caching
-RUN bun install -g turbo@^2
-
-# Copy entire monorepo for pruning
+# Copy all files
 COPY . .
-
-# Generate a partial monorepo with pruned lockfile for web workspace
+# Prune dashboard workspace
 RUN turbo prune @autonomi/web --docker
 
-# Installer stage - installs dependencies from pruned workspace
+# Installer stage
 FROM base AS installer
-RUN apk update && apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# Install turbo in this stage too since we need it for building
-RUN bun install -g turbo@^2
-
-# Copy lockfile and package.json files from pruned workspace
+# Copy package.json files from pruned workspace
 COPY --from=builder /app/out/json/ .
+COPY bunfig.toml .
 
-# Install dependencies (includes dev dependencies needed for build)
+# Install dependencies
 RUN bun install
 
-# Copy source files
+# Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
 
-# Build the application
-RUN turbo build --filter=@autonomi/web...
+# Build-time NEXT_PUBLIC_ env vars
+ARG NEXT_PUBLIC_PRIVY_APP_ID
 
-# Production stage
-FROM base AS runner
-RUN apk update && apk add --no-cache wget
+# Build engine types (dependency) then dashboard only
+# CI=1 + TURBO_UI=plain avoid interactive/stream UI so the RUN exits cleanly in Docker
+ENV NODE_ENV=production
+ENV CI=1
+ENV TURBO_UI=plain
+ENV TURBO_TELEMETRY_DISABLED=1
+
+# Force no cache, no daemon, single run
+RUN bunx turbo run build \
+    --filter=@autonomi/web \
+    --force \
+    --no-cache \
+    --no-daemon \
+    -- --no-lint
+
+# Runner stage - clean bun image, no turbo
+FROM oven/bun:1.3.9 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-USER bun
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-log-init -g nodejs nextjs
 
-# Copy standalone output (includes traced node_modules and server.js)
-COPY --from=installer --chown=bun:bun /app/apps/web/.next/standalone ./
-# Copy static assets
-COPY --from=installer --chown=bun:bun /app/apps/web/.next/static ./apps/web/.next/static
-# Copy public assets
-COPY --from=installer --chown=bun:bun /app/apps/web/public ./apps/web/public
+# Copy standalone output
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
-# Run from the apps/web directory (standalone server.js expects this path)
-WORKDIR /app/apps/web
+USER nextjs
 
 EXPOSE 3000
 
-# Health check for Swarm rolling updates
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
-
-# Graceful shutdown signal for rolling updates
-STOPSIGNAL SIGTERM
-
-CMD ["bun", "run", "server.js"]
+CMD ["bun", "apps/web/server.js"]
