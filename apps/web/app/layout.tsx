@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, DM_Mono } from "next/font/google";
+import {
+	DM_Mono,
+	Geist,
+	Geist_Mono,
+	Hedvig_Letters_Sans,
+	Hedvig_Letters_Serif,
+	Inter,
+} from "next/font/google";
 import localFont from "next/font/local";
 import { PrivyProviderWrapper } from "@/components/providers/PrivyProviderWrapper";
 import "./globals.css";
@@ -32,6 +39,18 @@ const dmMono = DM_Mono({
 	subsets: ["latin"],
 });
 
+const hedvigLettersSans = Hedvig_Letters_Sans({
+	variable: "--font-hedvig-letters-sans",
+	subsets: ["latin"],
+	weight: "400",
+});
+
+const hedvigLettersSerif = Hedvig_Letters_Serif({
+	variable: "--font-hedvig-letters-serif",
+	subsets: ["latin"],
+	weight: "400",
+});
+
 export const metadata: Metadata = {
 	title: "Autonomi",
 	description: "The first AI-native Agentic wallet",
@@ -47,28 +66,12 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<head>
-				<link rel="preconnect" href="https://fonts.googleapis.com" />
-				<link
-					rel="preconnect"
-					href="https://fonts.gstatic.com"
-					crossOrigin=""
-				/>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Sans&display=swap"
-					rel="stylesheet"
-				/>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&display=swap"
-					rel="stylesheet"
-				/>
-			</head>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${kaliceFont.variable} ${dmMono.variable} antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${kaliceFont.variable} ${dmMono.variable} ${hedvigLettersSans.variable} ${hedvigLettersSerif.variable} antialiased`}
 			>
 				<PrivyProviderWrapper>{children}</PrivyProviderWrapper>
 				<div
-					className="fixed inset-0 z-50 h-screen w-full bg-[url('/grain.jpg')] bg-repeat bg-[length:auto] opacity-[0.04] pointer-events-none select-none"
+					className="fixed inset-0 z-50 h-screen w-full bg-[url('/grain.jpg')] bg-repeat bg-auto opacity-[0.04] pointer-events-none select-none"
 					aria-hidden
 				/>
 			</body>
