@@ -2,7 +2,7 @@
 
 import { Header } from "@/components/dashboard/Header";
 
-export default function PortfolioPage() {
+export default function SettingsPage() {
 	return (
 		<>
 			<Header />
@@ -14,7 +14,7 @@ export default function PortfolioPage() {
 							"var(--font-hedvig-serif), 'Hedvig Letters Serif', serif",
 					}}
 				>
-					Portfolio
+					Settings
 				</h1>
 				<p className="mt-2 text-sm text-neutral-500">Coming soon.</p>
 			</div>

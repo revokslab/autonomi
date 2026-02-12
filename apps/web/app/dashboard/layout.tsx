@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { DashboardAuthGuard } from "@/components/dashboard/DashboardAuthGuard";
 
 export default function DashboardLayout({
 	children,
@@ -6,11 +7,13 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="min-h-screen bg-[#0B0B0B] dark">
-			<Sidebar />
-			<main className="ml-[86px] flex min-h-screen flex-col items-stretch gap-6 pb-6">
-				{children}
-			</main>
-		</div>
+		<DashboardAuthGuard>
+			<div className="min-h-screen bg-neutral-50">
+				<Sidebar />
+				<main className="ml-[96px] flex min-h-screen flex-col items-stretch pb-6">
+					{children}
+				</main>
+			</div>
+		</DashboardAuthGuard>
 	);
 }
