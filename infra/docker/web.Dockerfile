@@ -1,5 +1,5 @@
 # Base image with Bun
-FROM oven/bun:1.3.9 AS base
+FROM oven/bun:1.3.1 AS base
 
 # Install turbo CLI globally using Bun
 FROM base AS turbo-cli
@@ -46,7 +46,7 @@ RUN bunx turbo run build \
     -- --no-lint
 
 # Runner stage - clean bun image, no turbo
-FROM oven/bun:1.3.9 AS runner
+FROM oven/bun:1.3.1 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
