@@ -38,12 +38,7 @@ ENV TURBO_UI=plain
 ENV TURBO_TELEMETRY_DISABLED=1
 
 # Force no cache, no daemon, single run
-RUN bunx turbo run build \
-    --filter=@autonomi/web \
-    --force \
-    --no-cache \
-    --no-daemon \
-    -- --no-lint
+RUN bunx turbo run build --filter=@autonomi/web...
 
 # Runner stage - clean bun image, no turbo
 FROM oven/bun:1.3.1 AS runner
