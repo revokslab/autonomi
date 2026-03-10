@@ -8,7 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { ButtonWithCorners } from "./_components/button-with-corners";
 import { Keycap } from "./_components/keycap";
-import { GitHub, XformerlyTwitter } from "@/components/svg";
+import { XformerlyTwitter } from "@/components/svg";
 
 const hotkeysOptions = {
 	preventDefault: true,
@@ -154,13 +154,6 @@ export default function Home() {
 							rel="noopener noreferrer"
 						>
 							<XformerlyTwitter className="h-4 w-4 shrink-0" aria-hidden />
-						</Link>
-						<Link
-							href="https://github.com/revokslab/autonomi-new"
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							<GitHub className="h-5 w-5 shrink-0 text-gray-800" aria-hidden />
 						</Link>
 					</div>
 				</div>
