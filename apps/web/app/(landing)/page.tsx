@@ -160,7 +160,7 @@ export default function Home() {
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							<GitHub className="h-5 w-5 shrink-0" aria-hidden />
+							<GitHub className="h-5 w-5 shrink-0 text-gray-800" aria-hidden />
 						</Link>
 					</div>
 				</div>
