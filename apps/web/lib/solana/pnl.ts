@@ -103,3 +103,37 @@ export function computeUnrealizedPnlUsd(
 		return acc + (px - p.avgCostUsd) * p.quantity;
 	}, 0);
 }
+
+export function computeWalletWideEstimatePnlUsd(
+	positions: Position[],
+	balances: Array<{ mint: string; amount: number }>,
+	pricesUsd: Record<string, number>,
+): { pnlUsd: number; hasIncompleteBasisEstimate: boolean } {
+	const posByMint = new Map(positions.map((p) => [p.mint, p]));
+	let totalValue = 0;
+	let inferredCostBasis = 0;
+	let hasIncompleteBasisEstimate = false;
+
+	for (const b of balances) {
+		const px = pricesUsd[b.mint] ?? 0;
+		const value = b.amount * px;
+		totalValue += value;
+
+		const p = posByMint.get(b.mint);
+		if (p && p.quantity > 0) {
+			const matchedQty = Math.min(b.amount, p.quantity);
+			inferredCostBasis += matchedQty * p.avgCostUsd;
+			const externalQty = Math.max(0, b.amount - matchedQty);
+			if (externalQty > 0) hasIncompleteBasisEstimate = true;
+			inferredCostBasis += externalQty * px;
+		} else {
+			hasIncompleteBasisEstimate = hasIncompleteBasisEstimate || b.amount > 0;
+			inferredCostBasis += value;
+		}
+	}
+
+	return {
+		pnlUsd: totalValue - inferredCostBasis,
+		hasIncompleteBasisEstimate,
+	};
+}

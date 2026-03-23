@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	computeWalletWideEstimatePnlUsd,
 	computeUnrealizedPnlUsd,
 	derivePositions,
 	type ExecutedSwap,
@@ -44,5 +45,27 @@ describe("pnl", () => {
 
 		const pnl = computeUnrealizedPnlUsd(positions, prices);
 		expect(Number.isFinite(pnl)).toBe(true);
+	});
+
+	it("computes wallet-wide estimate pnl and incomplete basis flag", () => {
+		const positions = [
+			{
+				mint: "So11111111111111111111111111111111111111112",
+				quantity: 1,
+				costBasisUsd: 100,
+				avgCostUsd: 100,
+			},
+		];
+		const balances = [
+			{ mint: "So11111111111111111111111111111111111111112", amount: 1.5 },
+			{ mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", amount: 50 },
+		];
+		const prices = {
+			So11111111111111111111111111111111111111112: 120,
+			EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 1,
+		};
+		const out = computeWalletWideEstimatePnlUsd(positions, balances, prices);
+		expect(out.pnlUsd).toBeCloseTo(20, 6);
+		expect(out.hasIncompleteBasisEstimate).toBe(true);
 	});
 });

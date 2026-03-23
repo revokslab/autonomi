@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
 import {
 	useSignAndSendTransaction,
 	useWallets,
@@ -12,17 +11,19 @@ import { ArrowLeftRight, ExternalLink, RefreshCcw } from "lucide-react";
 
 import { Header } from "@/components/dashboard/Header";
 import {
-	computeUnrealizedPnlUsd,
-	derivePositions,
-	getEmbeddedSolanaAddressFromLinkedAccounts,
 	getTokenByMint,
 	loadExecutedSwaps,
 	saveExecutedSwaps,
 	SOLANA_TOKENS,
 	type ExecutedSwap,
-	type PrivyLinkedAccount,
 	solanaExplorerTxUrl,
 } from "@/lib/solana";
+import {
+	usePnl,
+	useWalletAddress,
+	useWalletBalances,
+	useCoinGeckoPrices,
+} from "@/hooks/solana";
 
 const jupiter = createJupiterApiClient();
 
@@ -35,17 +36,10 @@ function formatUsd(v: number): string {
 }
 
 export default function SwapPage() {
-	const { user } = usePrivy();
 	const { wallets } = useWallets();
 	const { signAndSendTransaction } = useSignAndSendTransaction();
-
-	const ownerAddress = useMemo(
-		() =>
-			getEmbeddedSolanaAddressFromLinkedAccounts(
-				(user?.linkedAccounts as unknown as PrivyLinkedAccount[]) ?? [],
-			),
-		[user?.linkedAccounts],
-	);
+	const { address: ownerAddress } = useWalletAddress();
+	const { balances } = useWalletBalances();
 
 	const [inputMint, setInputMint] = useState(SOLANA_TOKENS[0].mint); // SOL
 	const [outputMint, setOutputMint] = useState(SOLANA_TOKENS[1].mint); // USDC
@@ -59,7 +53,7 @@ export default function SwapPage() {
 	const [lastSig, setLastSig] = useState<string | null>(null);
 
 	const [swaps, setSwaps] = useState<ExecutedSwap[]>([]);
-	const [pricesUsd, setPricesUsd] = useState<Record<string, number>>({});
+	const { prices } = useCoinGeckoPrices(SOLANA_TOKENS.map((t) => t.mint));
 
 	useEffect(() => {
 		setSwaps(loadExecutedSwaps());
@@ -105,33 +99,6 @@ export default function SwapPage() {
 		void fetchQuote();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [inputMint, outputMint, inputAmountUi, slippageBps]);
-
-	// Poll prices every 8s for PnL display
-	useEffect(() => {
-		let cancelled = false;
-		const mints = SOLANA_TOKENS.map((t) => t.mint).join(",");
-		const run = async () => {
-			try {
-				const res = await fetch(`https://price.jup.ag/v6/price?ids=${mints}`);
-				const json = await res.json();
-				if (cancelled) return;
-				const out: Record<string, number> = {};
-				for (const t of SOLANA_TOKENS) {
-					const p = json?.data?.[t.mint]?.price;
-					if (typeof p === "number") out[t.mint] = p;
-				}
-				setPricesUsd(out);
-			} catch {
-				// ignore
-			}
-		};
-		void run();
-		const timer = window.setInterval(run, 8000);
-		return () => {
-			cancelled = true;
-			window.clearInterval(timer);
-		};
-	}, []);
 
 	const handleFlip = () => {
 		setInputMint(outputMint);
@@ -203,14 +170,21 @@ export default function SwapPage() {
 			? Number(quote.outAmount) / 10 ** outputToken.decimals
 			: 0;
 
-	const positions = useMemo(
-		() => derivePositions(swaps, pricesUsd),
-		[swaps, pricesUsd],
+	const {
+		appPositions,
+		appTradesPnlUsd,
+		walletWideEstimatePnlUsd,
+		hasIncompleteBasisEstimate,
+	} = usePnl(
+		swaps,
+		balances.map((b) => ({ mint: b.mint, amount: b.amount })),
+		prices,
 	);
-	const unrealizedPnlUsd = useMemo(
-		() => computeUnrealizedPnlUsd(positions, pricesUsd),
-		[positions, pricesUsd],
-	);
+	const pricesUsd = useMemo(() => {
+		const out: Record<string, number> = {};
+		for (const [mint, p] of Object.entries(prices)) out[mint] = p.usd;
+		return out;
+	}, [prices]);
 
 	return (
 		<>
@@ -361,17 +335,31 @@ export default function SwapPage() {
 						<div className="mt-3 rounded-sm border border-neutral-200 bg-neutral-50 p-3">
 							<p className="text-xs text-neutral-500">Unrealized PnL</p>
 							<p
-								className={`mt-1 text-lg font-medium ${unrealizedPnlUsd >= 0 ? "text-emerald-700" : "text-red-700"}`}
+								className={`mt-1 text-lg font-medium ${appTradesPnlUsd >= 0 ? "text-emerald-700" : "text-red-700"}`}
 							>
-								{formatUsd(unrealizedPnlUsd)}
+								{formatUsd(appTradesPnlUsd)}
+							</p>
+						</div>
+						<div className="mt-3 rounded-sm border border-neutral-200 bg-neutral-50 p-3">
+							<p className="text-xs text-neutral-500">Wallet-wide estimate</p>
+							<p
+								className={`mt-1 text-lg font-medium ${walletWideEstimatePnlUsd >= 0 ? "text-emerald-700" : "text-red-700"}`}
+							>
+								{formatUsd(walletWideEstimatePnlUsd)}
+							</p>
+							<p className="mt-1 text-xs text-neutral-500">
+								Estimate: includes external holdings using fallback basis.
+								{hasIncompleteBasisEstimate
+									? " Basis is partially inferred."
+									: ""}
 							</p>
 						</div>
 
 						<div className="mt-4 space-y-2">
-							{positions.length === 0 ? (
+							{appPositions.length === 0 ? (
 								<p className="text-sm text-neutral-500">No positions yet.</p>
 							) : (
-								positions.map((p) => {
+								appPositions.map((p) => {
 									const token = getTokenByMint(p.mint);
 									const px = pricesUsd[p.mint] ?? 0;
 									const pnl = (px - p.avgCostUsd) * p.quantity;

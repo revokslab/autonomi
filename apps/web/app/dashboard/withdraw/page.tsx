@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useMemo, useState } from "react";
 import {
 	useSignAndSendTransaction,
 	useWallets,
@@ -19,13 +18,10 @@ import { ExternalLink, Send } from "lucide-react";
 import { Header } from "@/components/dashboard/Header";
 import {
 	createSolanaConnection,
-	formatSol,
-	getEmbeddedSolanaAddressFromLinkedAccounts,
-	lamportsToSol,
 	shortenAddress,
 	solanaExplorerTxUrl,
-	type PrivyLinkedAccount,
 } from "@/lib/solana";
+import { useWalletBalances } from "@/hooks/solana";
 
 function parseAmountToLamports(amount: string): number | null {
 	const n = Number(amount);
@@ -36,21 +32,16 @@ function parseAmountToLamports(amount: string): number | null {
 }
 
 export default function WithdrawPage() {
-	const { user } = usePrivy();
-	const fromAddress = useMemo(
-		() =>
-			getEmbeddedSolanaAddressFromLinkedAccounts(
-				(user?.linkedAccounts as unknown as PrivyLinkedAccount[]) ?? [],
-			),
-		[user?.linkedAccounts],
-	);
+	const {
+		address: fromAddress,
+		balances,
+		loading: balanceLoading,
+	} = useWalletBalances();
 
 	const { wallets } = useWallets();
 	const { signAndSendTransaction } = useSignAndSendTransaction();
 
 	const [connection] = useState<Connection>(() => createSolanaConnection());
-	const [balanceLamports, setBalanceLamports] = useState<number | null>(null);
-	const [balanceLoading, setBalanceLoading] = useState(false);
 
 	const [toAddress, setToAddress] = useState("");
 	const [amount, setAmount] = useState("");
@@ -58,31 +49,13 @@ export default function WithdrawPage() {
 	const [signature, setSignature] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		let cancelled = false;
-		const run = async () => {
-			if (!fromAddress) {
-				setBalanceLamports(null);
-				return;
-			}
-			setBalanceLoading(true);
-			try {
-				const lamports = await connection.getBalance(
-					new PublicKey(fromAddress),
-				);
-				if (!cancelled) setBalanceLamports(lamports);
-			} catch {
-				if (!cancelled) setBalanceLamports(null);
-			} finally {
-				if (!cancelled) setBalanceLoading(false);
-			}
-		};
-		void run();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [connection, fromAddress]);
+	const balanceLamports = useMemo(() => {
+		const sol = balances.find(
+			(b) => b.mint === "So11111111111111111111111111111111111111112",
+		);
+		if (!sol) return null;
+		return Math.floor(sol.amount * LAMPORTS_PER_SOL);
+	}, [balances]);
 
 	const canSend = useMemo(() => {
 		const lamports = parseAmountToLamports(amount);
@@ -144,10 +117,6 @@ export default function WithdrawPage() {
 			});
 
 			setSignature(bs58.encode(out.signature));
-
-			// Refresh balance after sending
-			const newBal = await connection.getBalance(fromPubkey);
-			setBalanceLamports(newBal);
 		} catch (e) {
 			console.error(e);
 			setError("Transaction failed or was cancelled.");
@@ -201,7 +170,7 @@ export default function WithdrawPage() {
 								? "Loading…"
 								: balanceLamports == null
 									? "—"
-									: formatSol(lamportsToSol(balanceLamports))}
+									: `${(balanceLamports / LAMPORTS_PER_SOL).toLocaleString(undefined, { maximumFractionDigits: 6 })} SOL`}
 						</p>
 
 						<div className="mt-5 space-y-4">

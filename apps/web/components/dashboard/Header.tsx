@@ -2,9 +2,11 @@
 
 import { usePrivy } from "@privy-io/react-auth";
 import { Search, Wallet } from "lucide-react";
+import { usePortfolioValuation } from "@/hooks/solana";
 
 export function Header() {
 	const { user } = usePrivy();
+	const { totalUsd, loading, error } = usePortfolioValuation();
 	const emailAccount = user?.linkedAccounts?.find((a) => a.type === "email") as
 		| { address?: string }
 		| undefined;
@@ -48,7 +50,15 @@ export function Header() {
 						className="font-mono text-neutral-900"
 						style={{ fontFamily: "var(--font-geist-mono), monospace" }}
 					>
-						$0.00
+						{error
+							? "$—"
+							: loading
+								? "Loading…"
+								: totalUsd.toLocaleString(undefined, {
+										style: "currency",
+										currency: "USD",
+										maximumFractionDigits: 2,
+									})}
 					</span>
 				</button>
 				<div

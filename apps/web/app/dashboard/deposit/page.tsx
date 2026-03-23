@@ -1,33 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
 import { useFundWallet } from "@privy-io/react-auth/solana";
 import QRCode from "qrcode";
 import { Copy, ExternalLink, QrCode } from "lucide-react";
 
 import { Header } from "@/components/dashboard/Header";
-import {
-	getEmbeddedSolanaAddressFromLinkedAccounts,
-	type PrivyLinkedAccount,
-	shortenAddress,
-	solanaExplorerAddressUrl,
-} from "@/lib/solana";
+import { shortenAddress, solanaExplorerAddressUrl } from "@/lib/solana";
+import { usePortfolioValuation, useWalletAddress } from "@/hooks/solana";
 
 export default function DepositPage() {
-	const { user } = usePrivy();
 	const { fundWallet } = useFundWallet();
-	const address = useMemo(
-		() =>
-			getEmbeddedSolanaAddressFromLinkedAccounts(
-				(user?.linkedAccounts as unknown as PrivyLinkedAccount[]) ?? [],
-			),
-		[user?.linkedAccounts],
-	);
+	const { address } = useWalletAddress();
+	const { items } = usePortfolioValuation();
+	const sol = useMemo(() => items.find((i) => i.symbol === "SOL"), [items]);
 
 	const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	const [funding, setFunding] = useState(false);
+	const [fundingError, setFundingError] = useState<string | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -60,17 +51,27 @@ export default function DepositPage() {
 
 	const handleBuySol = async () => {
 		if (!address || funding) return;
+		setFundingError(null);
 		setFunding(true);
 		try {
-			await fundWallet({
-				address,
-				options: {
-					chain: "solana:mainnet",
-					asset: "native-currency",
-				},
-			});
+			// Guard against stuck modal bridge calls so UI doesn't spin forever.
+			await Promise.race([
+				fundWallet({
+					address,
+					options: {
+						chain: "solana:mainnet",
+						asset: "native-currency",
+					},
+				}),
+				new Promise((_, reject) =>
+					setTimeout(() => reject(new Error("Funding flow timeout")), 30000),
+				),
+			]);
 		} catch (e) {
 			console.error(e);
+			setFundingError(
+				"Could not open funding flow. Refresh and try again. If it continues, re-login to reinitialize Privy.",
+			);
 		} finally {
 			setFunding(false);
 		}
@@ -175,7 +176,20 @@ export default function DepositPage() {
 								Only send Solana (SOL) assets to this address. Deposits may take
 								a few confirmations to appear.
 							</p>
+							<p className="mt-2 text-xs text-neutral-600">
+								Current SOL balance:{" "}
+								{sol
+									? sol.amount.toLocaleString(undefined, {
+											maximumFractionDigits: 6,
+										})
+									: "—"}
+							</p>
 						</div>
+						{fundingError && (
+							<p className="mt-3 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+								{fundingError}
+							</p>
+						)}
 					</div>
 
 					<div className="rounded-sm border border-neutral-200 bg-white p-5">

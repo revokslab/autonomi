@@ -4,3 +4,4 @@ export * from "./format";
 export * from "./explorer";
 export * from "./tokens";
 export * from "./pnl";
+export * from "./coingecko";
