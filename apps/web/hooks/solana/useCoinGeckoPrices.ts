@@ -19,7 +19,19 @@ export function useCoinGeckoPrices(mints: string[]) {
 	const [prices, setPrices] = useState<PriceByMint>({});
 	const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
-	const ids = useMemo(() => getTrackedCoinGeckoIds(mints), [mints]);
+	// Stabilize dependencies to avoid refetch loops from new array instances.
+	const mintsKey = useMemo(
+		() => Array.from(new Set(mints)).sort().join(","),
+		[mints],
+	);
+	const normalizedMints = useMemo(
+		() => (mintsKey ? mintsKey.split(",").filter(Boolean) : []),
+		[mintsKey],
+	);
+	const ids = useMemo(
+		() => getTrackedCoinGeckoIds(normalizedMints),
+		[normalizedMints],
+	);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -33,7 +45,7 @@ export function useCoinGeckoPrices(mints: string[]) {
 			// stale-while-revalidate: serve cache immediately
 			if (cachedAt && Date.now() - cachedAt < 60_000) {
 				const fromCache: PriceByMint = {};
-				for (const mint of mints) {
+				for (const mint of normalizedMints) {
 					const id = getCoinGeckoIdByMint(mint);
 					if (!id) continue;
 					if (cachedPriceById[id]) fromCache[mint] = cachedPriceById[id];
@@ -57,7 +69,7 @@ export function useCoinGeckoPrices(mints: string[]) {
 				cachedAt = Date.now();
 
 				const next: PriceByMint = {};
-				for (const mint of mints) {
+				for (const mint of normalizedMints) {
 					const id = getCoinGeckoIdByMint(mint);
 					if (!id) continue;
 					const p = json[id] ?? cachedPriceById[id];
@@ -69,7 +81,34 @@ export function useCoinGeckoPrices(mints: string[]) {
 				}
 			} catch (e) {
 				console.error(e);
-				if (!cancelled) setError("Failed to fetch CoinGecko prices.");
+				// Fallback: Jupiter price API provides robust public Solana pricing.
+				try {
+					const res = await fetch(
+						`https://price.jup.ag/v6/price?ids=${encodeURIComponent(
+							normalizedMints.join(","),
+						)}`,
+					);
+					if (!res.ok) throw new Error(`Jupiter HTTP ${res.status}`);
+					const json = (await res.json()) as {
+						data?: Record<string, { price?: number }>;
+					};
+					const next: PriceByMint = {};
+					for (const mint of normalizedMints) {
+						const p = json.data?.[mint]?.price;
+						if (typeof p === "number" && Number.isFinite(p)) {
+							next[mint] = { usd: p };
+						}
+					}
+					if (!cancelled && Object.keys(next).length > 0) {
+						setPrices(next);
+						setLastUpdated(Date.now());
+						setError(null);
+						return;
+					}
+				} catch (fallbackError) {
+					console.error(fallbackError);
+				}
+				if (!cancelled) setError("Failed to fetch market prices.");
 			} finally {
 				if (!cancelled) setLoading(false);
 			}
@@ -81,7 +120,7 @@ export function useCoinGeckoPrices(mints: string[]) {
 			cancelled = true;
 			window.clearInterval(t);
 		};
-	}, [ids, mints]);
+	}, [ids, normalizedMints]);
 
 	return { prices, loading, error, lastUpdated };
 }

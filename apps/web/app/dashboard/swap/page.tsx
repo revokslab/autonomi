@@ -53,7 +53,8 @@ export default function SwapPage() {
 	const [lastSig, setLastSig] = useState<string | null>(null);
 
 	const [swaps, setSwaps] = useState<ExecutedSwap[]>([]);
-	const { prices } = useCoinGeckoPrices(SOLANA_TOKENS.map((t) => t.mint));
+	const trackedMints = useMemo(() => SOLANA_TOKENS.map((t) => t.mint), []);
+	const { prices } = useCoinGeckoPrices(trackedMints);
 
 	useEffect(() => {
 		setSwaps(loadExecutedSwaps());
