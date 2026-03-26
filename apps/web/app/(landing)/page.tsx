@@ -44,6 +44,17 @@ export default function Home() {
 					<nav className="flex items-center gap-6">
 						<ButtonWithCorners>
 							<Link
+								href="https://bags.fm/upzYo4Jz7aRUz33AT8RcThqesVTeeJ4JR9Ldxs9BAGS"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center gap-2 rounded-sm border border-neutral-300 bg-transparent px-6 py-2 text-sm font-normal text-neutral-900 transition hover:bg-neutral-100/80"
+								style={{ fontFamily: "var(--font-dm-mono), monospace" }}
+							>
+								Support The Dev <Keycap letter="S" />
+							</Link>
+						</ButtonWithCorners>
+						<ButtonWithCorners>
+							<Link
 								href="#demo"
 								className="flex items-center gap-2 rounded-sm border border-neutral-300 bg-transparent px-6 py-2 text-sm font-normal text-neutral-900 transition hover:bg-neutral-100/80"
 								style={{ fontFamily: "var(--font-dm-mono), monospace" }}
@@ -138,6 +149,13 @@ export default function Home() {
 						&copy; {year} The Revoks Company.
 					</Link>
 					<div className="flex items-center gap-4">
+						<Link
+							href="https://bags.fm/upzYo4Jz7aRUz33AT8RcThqesVTeeJ4JR9Ldxs9BAGS"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							CA: upzYo4Jz7aRUz33AT8RcThqesVTeeJ4JR9Ldxs9BAGS
+						</Link>
 						<Link
 							href="https://x.com/autonomidotrun"
 							target="_blank"

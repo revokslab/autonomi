@@ -9,7 +9,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaXTwitter } from "react-icons/fa6";
 
 function GoogleIcon() {
 	return (
@@ -82,7 +81,6 @@ export default function LoginPage() {
 	};
 
 	const handleGoogle = () => initOAuth({ provider: "google" });
-	const handleTwitter = () => initOAuth({ provider: "twitter" });
 	const handleConnectWallet = () => openLoginModal();
 
 	const isLoading =
@@ -183,15 +181,6 @@ export default function LoginPage() {
 						>
 							<GoogleIcon />
 							<span>Continue with Google</span>
-						</button>
-						<button
-							type="button"
-							onClick={handleTwitter}
-							disabled={!ready}
-							className="inline-flex items-center justify-center gap-3 font-medium text-neutral-900 bg-white border border-neutral-300 hover:bg-neutral-50 focus-visible:outline-none disabled:opacity-50 min-h-[44px] w-full px-4 py-3 rounded-sm cursor-pointer transition-colors"
-						>
-							<FaXTwitter className="w-4 h-4 shrink-0" />
-							<span>Continue with X</span>
 						</button>
 						<button
 							type="button"
